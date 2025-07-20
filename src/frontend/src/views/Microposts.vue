@@ -22,9 +22,13 @@
               v-model="newPost.title"
               type="text"
               class="form-input"
+              :class="{ 'border-red-500': hasFieldError('title') }"
               placeholder="What's on your mind?"
               required
             />
+            <p v-if="hasFieldError('title')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('title') }}
+            </p>
           </div>
           <div>
             <label for="user" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -34,6 +38,7 @@
               id="user"
               v-model="newPost.userId"
               class="form-input"
+              :class="{ 'border-red-500': hasFieldError('userId') }"
               required
             >
               <option value="">Select a user</option>
@@ -41,11 +46,14 @@
                 {{ user.name }}
               </option>
             </select>
+            <p v-if="hasFieldError('userId')" class="mt-1 text-sm text-red-600">
+              {{ getFieldError('userId') }}
+            </p>
           </div>
           <div class="flex justify-end">
             <button
               type="submit"
-              :disabled="loading || !newPost.title || !newPost.userId"
+              :disabled="loading || !isValid"
               class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
@@ -107,12 +115,15 @@
 
 <script>
 import { useApiStore } from '../stores/api'
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, watch } from 'vue'
+import { useFormValidation } from '../composables/useFormValidation'
+import { CreateMicropostFormSchema } from '../schemas/zod'
 
 export default {
   name: 'Microposts',
   setup() {
     const apiStore = useApiStore()
+    const { validate, isValid, getFieldError, hasFieldError, clearErrors } = useFormValidation(CreateMicropostFormSchema)
 
     const newPost = reactive({
       title: '',
@@ -124,11 +135,32 @@ export default {
     const loading = computed(() => apiStore.loading)
     const error = computed(() => apiStore.error)
 
+    // Watch form changes and validate
+    watch(newPost, () => {
+      if (newPost.title || newPost.userId) {
+        validate({
+          title: newPost.title,
+          userId: newPost.userId ? parseInt(newPost.userId) : null
+        })
+      }
+    }, { deep: true })
+
     const createPost = async () => {
+      const formData = {
+        title: newPost.title,
+        userId: newPost.userId ? parseInt(newPost.userId) : null
+      }
+      
+      const validation = validate(formData)
+      if (!validation.success) {
+        return
+      }
+
       try {
-        await apiStore.createMicropost(newPost.title, parseInt(newPost.userId))
+        await apiStore.createMicropost(formData.title, formData.userId)
         newPost.title = ''
         newPost.userId = ''
+        clearErrors()
       } catch (error) {
         console.error('Failed to create post:', error)
       }
@@ -154,6 +186,9 @@ export default {
       microposts,
       loading,
       error,
+      isValid,
+      getFieldError,
+      hasFieldError,
       createPost,
       fetchData,
       formatDate

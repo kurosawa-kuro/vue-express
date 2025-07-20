@@ -1,3 +1,6 @@
+import { CreateMicropostRequestSchema, MicropostsResponseSchema, MicropostSchema } from '../schemas/zod.js';
+import { validateResponse } from '../middleware/validation.js';
+
 export class MicropostController {
   constructor(micropostService) {
     this.micropostService = micropostService;
@@ -6,7 +9,8 @@ export class MicropostController {
   async getMicroposts(c, req, res) {
     try {
       const microposts = await this.micropostService.findAllMicroposts();
-      return res.json(microposts);
+      const validatedMicroposts = validateResponse(MicropostsResponseSchema)(microposts);
+      return res.json(validatedMicroposts);
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -21,7 +25,8 @@ export class MicropostController {
         return res.status(404).json({ error: 'Micropost not found' });
       }
       
-      return res.json(micropost);
+      const validatedMicropost = validateResponse(MicropostSchema)(micropost);
+      return res.json(validatedMicropost);
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -29,10 +34,20 @@ export class MicropostController {
 
   async createMicropost(c, req, res) {
     try {
-      const { title, userId } = c.request.requestBody;
-      const micropost = await this.micropostService.createMicropost({ title, userId });
-      return res.status(201).json(micropost);
+      const validatedRequest = CreateMicropostRequestSchema.parse(c.request.requestBody);
+      const micropost = await this.micropostService.createMicropost(validatedRequest);
+      const validatedMicropost = validateResponse(MicropostSchema)(micropost);
+      return res.status(201).json(validatedMicropost);
     } catch (error) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message
+          }))
+        });
+      }
       if (error.message === 'User not found') {
         return res.status(400).json({ error: error.message });
       }

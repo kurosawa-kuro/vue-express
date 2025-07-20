@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { UsersResponseSchema, MicropostsResponseSchema, MicropostSchema, ApiErrorSchema } from '../schemas/zod.js'
 
 const API_BASE_URL = 'http://localhost:3001'
 
@@ -17,10 +18,16 @@ export const useApiStore = defineStore('api', {
       this.error = null
       try {
         const response = await axios.get(`${API_BASE_URL}/users`)
-        this.users = response.data
+        const validatedUsers = UsersResponseSchema.parse(response.data)
+        this.users = validatedUsers
       } catch (error) {
-        this.error = error.message
-        console.error('Error fetching users:', error)
+        if (error.name === 'ZodError') {
+          this.error = 'Invalid data format received from server'
+          console.error('User data validation failed:', error.errors)
+        } else {
+          this.error = error.message
+          console.error('Error fetching users:', error)
+        }
       } finally {
         this.loading = false
       }
@@ -31,10 +38,16 @@ export const useApiStore = defineStore('api', {
       this.error = null
       try {
         const response = await axios.get(`${API_BASE_URL}/microposts`)
-        this.microposts = response.data
+        const validatedMicroposts = MicropostsResponseSchema.parse(response.data)
+        this.microposts = validatedMicroposts
       } catch (error) {
-        this.error = error.message
-        console.error('Error fetching microposts:', error)
+        if (error.name === 'ZodError') {
+          this.error = 'Invalid data format received from server'
+          console.error('Micropost data validation failed:', error.errors)
+        } else {
+          this.error = error.message
+          console.error('Error fetching microposts:', error)
+        }
       } finally {
         this.loading = false
       }
@@ -48,10 +61,23 @@ export const useApiStore = defineStore('api', {
           title,
           userId
         })
-        this.microposts.unshift(response.data)
-        return response.data
+        const validatedMicropost = MicropostSchema.parse(response.data)
+        this.microposts.unshift(validatedMicropost)
+        return validatedMicropost
       } catch (error) {
-        this.error = error.message
+        if (error.name === 'ZodError') {
+          this.error = 'Invalid data format received from server'
+          console.error('Created micropost validation failed:', error.errors)
+        } else if (error.response?.data) {
+          const apiError = ApiErrorSchema.safeParse(error.response.data)
+          if (apiError.success) {
+            this.error = apiError.data.error
+          } else {
+            this.error = error.message
+          }
+        } else {
+          this.error = error.message
+        }
         console.error('Error creating micropost:', error)
         throw error
       } finally {
@@ -64,10 +90,16 @@ export const useApiStore = defineStore('api', {
       this.error = null
       try {
         const response = await axios.get(`${API_BASE_URL}/microposts/${id}`)
-        return response.data
+        const validatedMicropost = MicropostSchema.parse(response.data)
+        return validatedMicropost
       } catch (error) {
-        this.error = error.message
-        console.error('Error fetching micropost:', error)
+        if (error.name === 'ZodError') {
+          this.error = 'Invalid data format received from server'
+          console.error('Micropost by ID validation failed:', error.errors)
+        } else {
+          this.error = error.message
+          console.error('Error fetching micropost:', error)
+        }
         throw error
       } finally {
         this.loading = false
