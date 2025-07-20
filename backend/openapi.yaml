@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Vue Express API
+  description: API for User and Micropost management
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Development server
+paths:
+  /api/users:
+    get:
+      summary: Get all users
+      operationId: getUsers
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+  /api/users/{id}:
+    get:
+      summary: Get user by ID
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+  /api/users/{id}/microposts:
+    get:
+      summary: Get microposts for a user
+      operationId: getUserMicroposts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of user's microposts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Micropost'
+        '404':
+          description: User not found
+  /api/microposts:
+    get:
+      summary: Get all microposts
+      operationId: getMicroposts
+      responses:
+        '200':
+          description: List of microposts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Micropost'
+    post:
+      summary: Create a new micropost
+      operationId: createMicropost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - userId
+              properties:
+                title:
+                  type: string
+                userId:
+                  type: integer
+      responses:
+        '201':
+          description: Micropost created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Micropost'
+        '400':
+          description: Bad request
+  /api/microposts/{id}:
+    get:
+      summary: Get micropost by ID
+      operationId: getMicropostById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Micropost found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Micropost'
+        '404':
+          description: Micropost not found
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        microposts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Micropost'
+    Micropost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        userId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
