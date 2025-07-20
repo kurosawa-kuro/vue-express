@@ -7,7 +7,9 @@
     "start": "node server.js",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+
+    "prisma:generate": "node generate-prisma.js"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",

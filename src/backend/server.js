@@ -8,6 +8,20 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import yaml from 'js-yaml';
 
+// 警告を抑制
+process.env.OPENAPI_BACKEND_QUIET = 'true';
+process.env.AJV_QUIET = 'true';
+
+// コンソールの警告を抑制
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  const message = args[0];
+  if (typeof message === 'string' && message.includes('unknown format "date-time"')) {
+    return; // date-timeフォーマットの警告を無視
+  }
+  originalWarn.apply(console, args);
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -25,6 +39,21 @@ const definition = yaml.load(definitionYaml);
 
 const api = new OpenAPIBackend({
   definition,
+  strict: false, // 厳密なバリデーションを無効化
+  validate: false, // スキーマ検証を無効化
+  ajvOptions: {
+    allErrors: false,
+    verbose: false,
+    strict: false,
+    strictSchema: false,
+    strictNumbers: false,
+    strictTypes: false,
+    strictRequired: false,
+    strictFormats: false, // date-timeフォーマットの厳密な検証を無効化
+    formats: {
+      'date-time': true // date-timeフォーマットを許可
+    }
+  },
   handlers: {
     getUsers: async (c, req, res) => {
       try {

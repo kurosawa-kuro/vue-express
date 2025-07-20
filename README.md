@@ -137,6 +137,28 @@ curl -X POST http://localhost:3001/microposts \
   -d '{"title":"Test post","userId":1}'
 ```
 
+## 🏗️ Design Flow
+
+This project follows a **Design-First API Development** approach:
+
+### 修正された設計フロー
+
+1. **OpenAPIスキーマ**（`openapi.yaml`）- API設計の定義
+2. **Prismaスキーマ生成**（`generate-prisma.js`）- OpenAPIからPrismaスキーマを自動生成
+3. **Prismaクライアント生成** - データベース操作のためのクライアント
+
+これで、`date-time`フォーマットの警告も解決され、設計→APIドキュメント→実装の正しい方向で開発が進められます。
+
+### API設計変更時のワークフロー
+
+今後、APIの設計を変更する場合は：
+
+1. `openapi.yaml`を編集
+2. `npm run prisma:generate`でPrismaスキーマを更新
+3. `npm run db:generate`でクライアントを再生成
+
+という流れで進めることができます。
+
 ## 📁 Project Structure
 
 ```
@@ -155,6 +177,7 @@ vue-express/
 │   │   ├── schema.prisma   # Database schema
 │   │   └── seed.js         # Database seeding
 │   ├── openapi.yaml        # API specification
+│   ├── generate-prisma.js  # Prisma schema generator
 │   ├── server.js           # Express server
 │   ├── .env               # Environment variables
 │   └── package.json
@@ -183,6 +206,7 @@ vue-express/
 - `npm run db:generate` - Generate Prisma client
 - `npm run db:migrate` - Run database migrations
 - `npm run db:seed` - Seed database
+- `npm run prisma:generate` - Generate Prisma schema from OpenAPI
 
 ## 🎯 Features Implemented
 

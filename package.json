@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "build": "cd frontend && npm run build",
-    "db:migrate": "cd backend && npm run db:migrate",
-    "db:generate": "cd backend && npm run db:generate",
-    "db:seed": "cd backend && npm run db:seed"
+    "dev:frontend": "cd src/frontend && npm run dev",
+    "dev:backend": "cd src/backend && npm run dev",
+    "install:all": "npm install && cd src/frontend && npm install && cd ../backend && npm install",
+    "build": "cd src/frontend && npm run build",
+    "db:migrate": "cd src/backend && npm run db:migrate",
+    "db:generate": "cd src/backend && npm run db:generate",
+    "db:seed": "cd src/backend && npm run db:seed"
   },
   "keywords": ["vue", "express", "prisma", "fullstack"],
   "author": "Toshifumi Kurosawa",
