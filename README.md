@@ -94,6 +94,21 @@ npm run dev:frontend
 npm run dev:backend
 ```
 
+## 🧪 Testing
+
+### 実行方法
+
+```bash
+# テスト実行
+npm run test
+
+# ウォッチモード  
+npm run test:watch
+
+# カバレッジ付き
+npm run test:coverage
+```
+
 ## 🧪 Verification Steps
 
 ### 1. Access the Application
@@ -207,6 +222,11 @@ vue-express/
 - `npm run db:migrate` - Run database migrations
 - `npm run db:seed` - Seed database
 - `npm run prisma:generate` - Generate Prisma schema from OpenAPI
+
+### Testing
+- `npm run test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
 
 ## 🎯 Features Implemented
 

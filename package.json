@@ -13,10 +13,16 @@
     "db:generate": "cd src/backend && npm run db:generate",
     "db:seed": "cd src/backend && npm run db:seed"
   },
-  "keywords": ["vue", "express", "prisma", "fullstack"],
+  "keywords": [
+    "vue",
+    "express",
+    "prisma",
+    "fullstack"
+  ],
   "author": "Toshifumi Kurosawa",
   "license": "ISC",
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "concurrently": "^8.2.2"
   }
 }
